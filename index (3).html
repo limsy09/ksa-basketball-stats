@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>KSA Killerwhales 스탯 기록</title>
+<meta name="theme-color" content="#EF8A1E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🏀%3C/text%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<style>
+:root{--bg:#F5F6F8;--sf:#fff;--ink:#14171C;--mut:#69707D;--ln:#E3E6EB;--o:#EF8A1E;--y:#F3C614;--oi:#FFF1E0;--yi:#FFF8D6;--ac:#14171C;--acf:#fff;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0F1115;--sf:#181B21;--ink:#ECEEF2;--mut:#98A0AD;--ln:#2A2E36;--oi:#2B2013;--yi:#2A2510;--ac:#ECEEF2;--acf:#14171C}}
+:root[data-theme="dark"]{--bg:#0F1115;--sf:#181B21;--ink:#ECEEF2;--mut:#98A0AD;--ln:#2A2E36;--oi:#2B2013;--yi:#2A2510;--ac:#ECEEF2;--acf:#14171C}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;font-variant-numeric:tabular-nums;-webkit-tap-highlight-color:transparent}
+.wrap{max-width:1080px;margin:0 auto;padding:18px 14px 48px}
+header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+h1{font-size:22px;font-weight:700;margin:0;letter-spacing:-.02em}
+.act{display:flex;gap:8px;flex-wrap:wrap}
+button{font:inherit;color:inherit;cursor:pointer}
+.btn{border:1px solid var(--ln);background:var(--sf);border-radius:10px;padding:8px 14px;font-size:14px;font-weight:500}
+.btn.pri{background:var(--ac);color:var(--acf);border-color:var(--ac)}
+.btn:disabled{opacity:.4;cursor:default}
+:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+.bar{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;margin-bottom:14px}
+.tabs{display:flex;gap:6px;align-items:center}
+.tabs .lab{font-size:13px;color:var(--mut);margin-right:2px}
+.tab{border:1px solid var(--ln);background:var(--sf);border-radius:999px;min-width:44px;padding:6px 14px;font-size:14px;font-weight:600}
+.tab.on{background:var(--ac);color:var(--acf);border-color:var(--ac)}
+.tab.add{color:var(--mut);font-weight:500}
+.sw{margin-left:auto;display:flex;border:1px solid var(--ln);border-radius:10px;overflow:hidden;background:var(--sf)}
+.sw button{border:0;background:none;padding:7px 14px;font-size:13px;font-weight:500;color:var(--mut)}
+.sw button.on{background:var(--ac);color:var(--acf)}
+.teams{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:14px}
+.team{background:var(--sf);border:1px solid var(--ln);border-radius:14px;overflow:hidden}
+.team.o{border-top:5px solid var(--o)}.team.y{border-top:5px solid var(--y)}
+.th{display:flex;justify-content:space-between;align-items:baseline;padding:12px 14px 6px}
+.th b{font-size:16px}.th span{font-size:26px;font-weight:700}
+.row{padding:10px 12px;border-top:1px solid var(--ln)}
+.who{display:flex;align-items:baseline;gap:8px;margin-bottom:8px}
+.who b{font-size:16px;font-weight:600}.who em{font-style:normal;font-size:13px;color:var(--mut)}
+.btns{display:flex;flex-wrap:wrap;gap:6px}
+.b{flex:1 1 56px;min-width:56px;border:1px solid var(--ln);background:var(--bg);border-radius:10px;padding:6px 4px 5px;display:flex;flex-direction:column;align-items:center;gap:1px;touch-action:manipulation;transition:transform .08s}
+.b:active{transform:scale(.94)}
+.b i{font-style:normal;font-size:11px;color:var(--mut)}
+.b strong{font-size:19px;font-weight:700;line-height:1.15}
+.o .b.hit{background:var(--oi);border-color:var(--o)}.y .b.hit{background:var(--yi);border-color:var(--y)}
+.pct{flex:1 1 56px;min-width:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:11px;color:var(--mut)}
+.pct strong{font-size:15px;color:var(--ink)}
+.empty{padding:22px 14px;color:var(--mut);font-size:14px}
+.ov{position:fixed;inset:0;background:rgba(10,12,16,.5);display:none;align-items:flex-end;justify-content:center;z-index:20}
+.ov.show{display:flex}
+.sheet{background:var(--sf);width:100%;max-width:560px;max-height:88vh;overflow:auto;border-radius:18px 18px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom,0px))}
+@media(min-width:640px){.ov{align-items:center}.sheet{border-radius:18px}}
+.sheet h2{font-size:17px;margin:0 0 4px}.sheet p{font-size:13px;color:var(--mut);margin:0 0 10px}
+textarea{width:100%;min-height:96px;border:1px solid var(--ln);border-radius:10px;padding:10px;font:inherit;font-size:14px;background:var(--bg);color:var(--ink);resize:vertical}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 16px}
+.chip{border:1px solid var(--ln);background:var(--bg);border-radius:999px;padding:7px 14px;font-size:14px}
+.chip.o{background:var(--o);border-color:var(--o);color:#1b1206}.chip.y{background:var(--y);border-color:var(--y);color:#1b1606}
+.sheet .foot{display:flex;justify-content:space-between;gap:8px;margin-top:6px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ac);color:var(--acf);padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:30}
+.toast.show{opacity:1}
+.toast[data-u="1"]{pointer-events:auto;cursor:pointer}
+h1 small{font-weight:500;color:var(--mut);font-size:15px;margin-left:8px}
+.score{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;background:var(--sf);border:1px solid var(--ln);border-radius:16px;padding:14px 20px;margin-bottom:14px}
+.score .t{display:flex;align-items:baseline;gap:12px}.score .t:last-child{flex-direction:row-reverse}
+.score .nm{font-size:20px;font-weight:700}.score .n{font-size:48px;font-weight:700;line-height:1}
+.score .t.o .nm{border-bottom:4px solid var(--o)}.score .t.y .nm{border-bottom:4px solid var(--y)}
+.score .mid{text-align:center;font-size:12px;color:var(--mut);line-height:1.6}
+.help{background:var(--sf);border:1px solid var(--ln);border-radius:14px;padding:6px 22px 12px;margin-top:16px;font-size:14px;line-height:1.75}
+.grp{font-size:12px;color:var(--mut);width:100%;margin-top:6px}
+.chip small{opacity:.7;margin-right:5px}
+.who b small{color:var(--mut);font-weight:500;margin-right:2px}
+.who em{color:var(--ink);font-weight:700;font-size:15px}
+.b strong{font-size:20px}
+.b strong{font-weight:500;color:var(--mut)}.b strong.z{opacity:.25}
+.bw{position:relative;flex:1 1 56px;min-width:56px;display:flex}
+.bw .b{flex:1;min-width:0}
+.m{position:absolute;top:1px;right:1px;width:26px;height:26px;border:0;border-radius:50%;background:transparent;color:var(--mut);font-size:16px;line-height:1;opacity:.55;padding:0}
+.m:hover,.m:active{opacity:1;background:var(--ln)}
+.b strong{font-weight:400;font-size:19px}
+.who em{color:var(--mut);font-weight:500}
+.th span{color:var(--mut);font-weight:500;font-size:22px}
+.team{padding-bottom:10px}
+.row{margin:8px 10px 0;border:1px solid var(--ln);border-left-width:6px;border-radius:12px;padding:10px 12px}
+.o .row{border-left-color:var(--o)}.y .row{border-left-color:var(--y)}
+.row.last{box-shadow:0 0 0 2px var(--ac)}
+.who b{font-size:21px;font-weight:700}.who b small{font-size:15px}.who em{font-size:16px}
+.gform{display:flex;gap:8px;flex-wrap:wrap}
+.gform input{flex:1 1 120px;border:1px solid var(--ln);border-radius:10px;padding:9px 10px;font:inherit;font-size:14px;background:var(--bg);color:var(--ink)}
+.g{display:flex;align-items:center;gap:8px;padding:9px 0;border-top:1px solid var(--ln);font-size:14px}.g span{flex:1}
+
+/* ---- 섞은 UI: 원래의 부드러움 + 굵고 또렷한 숫자·팀 색 ---- */
+:root{--ln:#D3D7DD}
+body{font-family:"Noto Sans KR","IBM Plex Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif}
+h1{font-weight:800}h1 small{font-weight:500}
+.btn{border-radius:8px;font-weight:600}
+.tab{border-radius:8px;font-weight:700}
+.sw{border-radius:8px}.sw button{font-weight:700}
+.score{border-radius:10px;border-bottom:4px solid var(--ink)}
+.score .n{font-weight:900}
+.team{border-radius:10px}
+.team.o{border-top:6px solid var(--o)}.team.y{border-top:6px solid var(--y)}
+.th b{font-weight:800}.th span{color:var(--ink);font-weight:800}
+.row{border-radius:8px;border-left-width:6px}
+.b{border-radius:8px;background:var(--sf)}
+.b strong{font-weight:700;font-size:21px;color:var(--ink)}.b strong.z{opacity:.2}
+.who b{font-weight:800}
+/* ---- 화면 넓히기 + 글자 줄바꿈 방지 ---- */
+body{word-break:keep-all;overflow-wrap:break-word;font-size:16px}
+.wrap{max-width:1280px}
+.teams{grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr))}
+.b,.bw,.pct{flex:1 1 76px;min-width:76px}
+.b i,.pct i{white-space:nowrap;font-size:12px}
+.b strong{font-size:23px}
+.who b{font-size:22px;white-space:nowrap}.who em{white-space:nowrap}
+.btn,.tab,.chip,.sw button,.score .nm,h1{white-space:nowrap}
+.th b{white-space:nowrap}
+ .toast{max-width:90vw;text-align:center}
+/* ---- 상세 모드: 살짝만 촘촘하게 (나머지는 자동 맞춤이 처리) ---- */
+.wrap{padding-bottom:20px}
+.dt .row{margin:6px 8px 0;padding:8px 10px}
+.dt .who{margin-bottom:6px}.dt .who b{font-size:20px}
+.dt .btns{gap:5px}
+.dt .b{padding:5px 4px 4px}
+.dt .b strong{font-size:21px}
+.dt .score{padding:10px 18px}.dt .score .n{font-size:40px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<h1>KSA Killerwhales<small>스탯 기록</small></h1>
+<div class="act">
+<button class="btn" id="undo">되돌리기</button>
+<button class="btn" id="games">경기 저장</button>
+<button class="btn" id="help">사용 방법</button>
+<button class="btn" id="logout" hidden>로그아웃</button>
+<button class="btn" id="setup">선수·팀 설정</button>
+<button class="btn pri" id="export">엑셀로 저장</button>
+</div>
+</header>
+<div class="bar">
+<div class="tabs" id="rt"></div>
+<div class="tabs" id="qt"></div>
+<div class="sw" id="mode"><button data-m="0">기본</button><button data-m="1">상세</button></div>
+</div>
+<div class="score" id="score"></div>
+<div class="teams" id="teams"></div>
+<section class="help" id="helpbox" hidden>
+<h2 style="font-size:17px">사용 방법</h2>
+<ol>
+<li><b>선수·팀 설정:</b> 선수 이름을 누르면 A팀 → B팀 → 제외 순서로 바뀝니다. 라운드마다 설정할 수 있어요.</li>
+<li><b>기록하기:</b> R(라운드)과 Q(쿼터)를 선택하고, 선수 카드의 버튼을 눌러 기록합니다. 한 번 누르면 한 번 기록돼요.</li>
+<li><b>기록 취소:</b> Backspace 또는 Z 키를 누르거나 하단 알림을 눌러 취소할 수 있어요. 특정 기록은 해당 칸의 ‘−’ 버튼으로 하나씩 삭제합니다.</li>
+<li><b>상세 모드:</b> ‘상세’를 켜면 2점슛·3점슛·자유투의 성공과 실패를 기록하고 야투율을 자동으로 계산합니다. 기본 모드의 슛 기록은 득점에만 반영돼요.</li>
+<li><b>엑셀 저장:</b> 현재 모드의 형식으로 기록이 있는 라운드와 쿼터만 저장합니다.</li>
+<li><b>경기 저장:</b> 날짜와 상대팀을 입력해 경기를 저장하고, 나중에 다시 불러올 수 있어요. 엑셀 파일에는 ‘시즌 누적’ 시트도 포함됩니다.</li>
+<li><b>명단 수정 및 기록 보관:</b> 학기가 바뀌면 설정의 ‘명단 수정’에서 선수 이름을 변경하세요. 기록은 현재 기기의 브라우저에 저장됩니다.</li>
+</ol>
+</section>
+</div>
+
+<div class="ov" id="ov"><div class="sheet" role="dialog" aria-modal="true" aria-label="선수와 팀 설정">
+<h2><span id="rl"></span> 팀 구성</h2>
+<p>이름을 누를 때마다 주황, 노랑, 제외 순서로 바뀝니다.</p>
+<div class="chips" id="chips"></div>
+<button class="btn" id="edit">명단 수정 (학기가 바뀔 때)</button>
+<div id="rost" hidden><p style="margin-top:10px">‘#’로 시작하는 줄은 학번(기수) 제목이고, 그 아래에 한 줄에 한 명씩 적어요. 등번호는 이름 뒤에 ‘|7’처럼 붙여요.</p><textarea id="roster"></textarea></div>
+<div class="foot"><button class="btn" id="reset">모든 기록 지우기</button><button class="btn pri" id="done">완료</button></div>
+</div></div>
+<div class="ov" id="ov2"><div class="sheet" role="dialog" aria-modal="true" aria-label="경기 저장">
+<h2>경기 저장</h2><p>현재 기록에 날짜와 상대팀을 붙여 저장해 두면, 나중에 다시 열 수 있고 시즌 누적에 합쳐져요.</p>
+<div class="gform"><input type="date" id="gd"><input id="go" placeholder="상대팀"><button class="btn pri" id="gsave">저장</button></div>
+<h2 style="margin-top:18px">저장된 경기</h2><div id="glist"></div>
+<h2 style="margin-top:18px">백업</h2><p>명단, 저장한 경기, 현재 기록을 파일로 저장하고 다른 기기나 브라우저에서 불러올 수 있어요.</p><div class="gform"><button class="btn" id="bk">백업 저장</button><button class="btn" id="rs">백업 불러오기</button><input type="file" id="bkf" accept=".json,application/json" hidden></div>
+<div class="foot" style="margin-top:14px"><button class="btn" id="gnew">새 경기 시작</button><button class="btn pri" id="gdone">닫기</button></div>
+</div></div>
+<div class="ov" id="lg"><div class="sheet" style="text-align:center"><h2>KSA Killerwhales 스탯 기록</h2><p id="lgmsg">팀원 계정으로 로그인해 주세요.</p><button class="btn pri" id="glogin">Google로 로그인</button></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const KEY='bb-stat-v1';
+const TEAMS=[['o','A'],['y','B']];
+const DEFAULT=[];
+const DEFTXT='';
+function parseR(t){const g=[];(t||'').split(/\n/).forEach(l=>{l=l.trim();if(!l)return;if(l[0]==='#'){g.push({l:l.replace(/^#+\s*/,''),p:[]});return}if(!g.length)g.push({l:'',p:[]});l.split(',').forEach(x=>{const[n,no]=x.split('|').map(s=>s.trim());if(n)g[g.length-1].p.push({n,no:no||''})})});return g}
+const names=()=>parseR(S.roster).flatMap(g=>g.p.map(p=>p.n));
+const NO=()=>{const m={};parseR(S.roster).forEach(g=>g.p.forEach(p=>m[p.n]=p.no));return m};
+const FG=o=>{const m=o.fgm||0,a=o.fga||0;return{m,x:Math.max(0,a-m),a}};
+const LAB={ftm:'자유투 성공',ftx:'자유투 실패',p2:'2점',p3:'3점',f2:'2점 성공',f3:'3점 성공',miss:'실패',ast:'어시스트',reb:'리바운드',stl:'스틸',blk:'블락',tov:'턴오버'};
+const STATS=[['ast','어시스트'],['reb','리바운드'],['stl','스틸'],['blk','블락'],['tov','턴오버']];
+const ACT={ftm:{pts:1,ftm:1,fta:1},ftx:{fta:1},p2:{pts:2,p2:1},p3:{pts:3,p3:1},f2:{pts:2,p2:1,fgm:1,fga:1},f3:{pts:3,p3:1,fgm:1,fga:1},miss:{fga:1},ast:{ast:1},reb:{reb:1},stl:{stl:1},blk:{blk:1},tov:{tov:1}};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function load(){try{return JSON.parse(localStorage.getItem(KEY))}catch(e){return null}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+const mkRound=()=>({o:[],y:[],s:{}});
+let S=load()||{detail:false,qs:2,rounds:[mkRound(),mkRound()]};
+if(!S.roster)S.roster=DEFTXT;
+if(!S.games)S.games=[];
+let cur={r:0,q:1},hist=[],resetArm=false,lastN='',delArm='',newArm=false;
+
+function cell(r,q,n){const s=S.rounds[r].s;s[q]=s[q]||{};s[q][n]=s[q][n]||{};return s[q][n]}
+function add(r,q,n,d,sign){const o=cell(r,q,n);for(const k in d)o[k]=Math.max(0,(o[k]||0)+sign*d[k])}
+function tap(n,k){const d=ACT[k];add(cur.r,cur.q,n,d,1);hist.push({r:cur.r,q:cur.q,n,d});lastN=n;save();render();toast(n+' · '+LAB[k]+'  (눌러서 취소)',1)}
+const val=(o,k)=>{const m={f2:o.p2,f3:o.p3,miss:FG(o).x,ftm:o.ftm,ftx:(o.fta||0)-(o.ftm||0)};return (k in m?m[k]:o[k])||0};
+function dec(n,k){const o=cell(cur.r,cur.q,n);if(!(val(o,k)>0)){toast('지울 기록이 없어요');return}
+  const d=Object.assign({},ACT[k]);if((k==='f2'||k==='f3')&&!o.fgm){delete d.fgm;delete d.fga}
+  add(cur.r,cur.q,n,d,-1);hist.push({r:cur.r,q:cur.q,n,d,neg:1});lastN=n;save();render();toast(n+' · '+LAB[k]+' 하나 지움  (눌러서 취소)',1)}
+function undo(){const h=hist.pop();if(!h){toast('되돌릴 기록이 없어요');return}add(h.r,h.q,h.n,h.d,h.neg?1:-1);save();render();toast('취소했어요')}
+function toast(t,u){const e=$('toast');e.textContent=t;e.dataset.u=u?'1':'';e.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('show'),u?4000:2200)}
+$('toast').onclick=e=>{if(e.currentTarget.dataset.u)undo()};
+
+function tabs(el,label,n,on,pick,addFn,suffix){
+  el.innerHTML='<span class="lab">'+label+'</span>'+Array.from({length:n},(_,i)=>'<button class="tab'+(i+1===on?' on':'')+'" data-i="'+(i+1)+'">'+(i+1)+suffix+'</button>').join('')+'<button class="tab add" aria-label="'+label+' 추가">＋</button>';
+  el.onclick=e=>{const b=e.target.closest('button');if(!b)return;b.dataset.i?pick(+b.dataset.i):addFn()}
+}
+function render(){
+  tabs($('rt'),'라운드',S.rounds.length,cur.r+1,i=>{cur.r=i-1;render()},()=>{S.rounds.push(mkRound());cur.r=S.rounds.length-1;save();render()},'R');
+  tabs($('qt'),'쿼터',S.qs,cur.q,i=>{cur.q=i;render()},()=>{S.qs++;cur.q=S.qs;save();render()},'Q');
+  document.querySelectorAll('#mode button').forEach(b=>b.classList.toggle('on',(b.dataset.m==='1')===S.detail));
+  const R=S.rounds[cur.r];
+  const NOm=NO();
+  const sc=(t,q)=>R[t].reduce((a,n)=>a+((R.s[q]&&R.s[q][n]&&R.s[q][n].pts)||0),0),all=t=>{let s=0;for(const q in R.s)s+=sc(t,q);return s};
+  $('score').innerHTML='<div class="t o"><span class="nm">A</span><span class="n">'+all('o')+'</span></div><div class="mid">'+(cur.r+1)+'R 합계<br>'+cur.q+'Q '+sc('o',cur.q)+' : '+sc('y',cur.q)+'</div><div class="t y"><span class="nm">B</span><span class="n">'+all('y')+'</span></div>';
+  $('teams').innerHTML=TEAMS.map(([t,tn])=>{
+    const ps=R[t];let tot=0;
+    const rows=ps.map(n=>{
+      const o=(R.s[cur.q]&&R.s[cur.q][n])||{};tot+=o.pts||0;
+      const B=(k,l,v,hit)=>'<div class="bw"><button class="b'+(hit?' hit':'')+'" data-n="'+esc(n)+'" data-k="'+k+'"><i>'+l+'</i><strong'+(v?'':' class="z"')+'>'+v+'</strong></button><button class="m" data-n="'+esc(n)+'" data-k="'+k+'" aria-label="'+l+' 하나 지우기">−</button></div>';
+      let h=S.detail?B('f2','2점 성공',o.p2||0,1)+B('f3','3점 성공',o.p3||0,1)+B('miss','실패',FG(o).x,0)+'<div class="pct"><i>야투율</i><strong>'+(FG(o).a?Math.round(FG(o).m/FG(o).a*100)+'%':'–')+'</strong></div>'+B('ftm','자유투 성공',o.ftm||0,1)+B('ftx','자유투 실패',(o.fta||0)-(o.ftm||0),0):B('p2','2점',o.p2||0,1)+B('p3','3점',o.p3||0,1);
+      h+=STATS.filter(([k])=>S.detail||k!=='stl').map(([k,l])=>B(k,l,o[k]||0,0)).join('');
+      return '<div class="row'+(n===lastN?' last':'')+'"><div class="who"><b>'+(NOm[n]?'<small>'+esc(NOm[n])+'</small> ':'')+esc(n)+'</b><em>'+(o.pts||0)+'점</em></div><div class="btns">'+h+'</div></div>';
+    }).join('');
+    return '<section class="team '+t+'"><div class="th"><b>'+tn+'</b><span>'+tot+'</span></div>'+(rows||'<div class="empty"><button class="btn pri" data-open="1">'+(cur.r+1)+'R 팀 구성하기</button></div>')+'</section>';
+  }).join('');
+}
+$('teams').onclick=e=>{if(e.target.closest('[data-open]')){openSetup();return}const m=e.target.closest('.m');if(m){dec(m.dataset.n,m.dataset.k);return}const b=e.target.closest('.b');if(b)tap(b.dataset.n,b.dataset.k)};
+$('mode').onclick=e=>{const b=e.target.closest('button');if(!b)return;S.detail=b.dataset.m==='1';save();render()};
+$('undo').onclick=undo;
+document.addEventListener('keydown',e=>{if(e.target.closest&&e.target.closest('textarea,input'))return;if(['Backspace','Delete','z','Z','ㅋ'].includes(e.key)){e.preventDefault();undo()}});
+
+function chips(){
+  $('rl').textContent=(cur.r+1)+'R';
+  const R=S.rounds[cur.r];
+  $('chips').innerHTML=parseR(S.roster).length?parseR(S.roster).map(g=>(g.l?'<div class="grp">'+esc(g.l)+'</div>':'')+g.p.map(({n,no})=>{const t=R.o.includes(n)?'o':R.y.includes(n)?'y':'';return '<button class="chip '+t+'" data-n="'+esc(n)+'">'+(no?'<small>'+esc(no)+'</small>':'')+esc(n)+'</button>'}).join('')).join(''):'<span class="empty" style="padding:0">명단을 입력하면 여기에 나타나요.</span>';
+}
+function parseRoster(){S.roster=$('roster').value;save();chips()}
+function openSetup(){$('roster').value=S.roster;resetArm=false;$('reset').textContent='모든 기록 지우기';$('rost').hidden=true;chips();$('ov').classList.add('show')}
+$('setup').onclick=openSetup;
+$('edit').onclick=()=>{$('rost').hidden=!$('rost').hidden};
+$('roster').oninput=parseRoster;
+$('chips').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;const n=b.dataset.n,R=S.rounds[cur.r];
+  if(R.o.includes(n)){R.o=R.o.filter(x=>x!==n);R.y.push(n)}else if(R.y.includes(n)){R.y=R.y.filter(x=>x!==n)}else R.o.push(n);
+  save();chips()};
+$('done').onclick=()=>{const N=names();S.rounds.forEach(R=>{R.o=R.o.filter(n=>N.includes(n));R.y=R.y.filter(n=>N.includes(n))});save();$('ov').classList.remove('show');render()};
+$('ov').onclick=e=>{if(e.target===$('ov'))$('done').click()};
+$('reset').onclick=()=>{
+  if(!resetArm){resetArm=true;$('reset').textContent='한 번 더 누르면 모두 삭제돼요';return}
+  S={roster:S.roster,games:S.games,gid:'',detail:S.detail,qs:2,rounds:[mkRound(),mkRound()]};cur={r:0,q:1};hist=[];save();$('ov').classList.remove('show');render();toast('기록을 지웠어요')};
+
+const td=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const snap=()=>JSON.parse(JSON.stringify({detail:S.detail,qs:S.qs,rounds:S.rounds}));
+function seasonSheet(wb,G){
+  const K=[['pts','득점'],['p2','2점'],['p3','3점'],['ftm','자유투 성공'],['fta','자유투 시도'],['ast','어시스트'],['reb','리바운드'],['stl','스틸'],['blk','블락'],['tov','턴오버'],['aa','야투'],['mm','야투 성공']],T={};
+  G.forEach(g=>{const seen=new Set();g.rounds.forEach(R=>{for(const q in R.s)for(const n in R.s[q]){const o=R.s[q][n];if(!Object.values(o).some(v=>v>0))continue;const t=T[n]=T[n]||{gp:0};seen.add(n);for(const k in o)t[k]=(t[k]||0)+o[k];const f=FG(o);t.mm=(t.mm||0)+f.m;t.aa=(t.aa||0)+f.a}});seen.forEach(n=>T[n].gp++)});
+  const rows=[['선수','경기',...K.map(x=>x[1]),'야투율(상세 기록만)','경기당 득점']];
+  Object.keys(T).sort((a,b)=>(T[b].pts||0)-(T[a].pts||0)).forEach(n=>{const t=T[n];rows.push([n,t.gp,...K.map(([k])=>t[k]||0),t.aa?Math.round(t.mm/t.aa*100)+'%':'',Math.round((t.pts||0)/t.gp*10)/10])});
+  const w=XLSX.utils.aoa_to_sheet(rows);w['!cols']=rows[0].map((_,i)=>({wpx:104}));
+  const b2={style:'thin',color:{rgb:'D1D5DB'}};
+  rows.forEach((r,ri)=>r.forEach((_,ci)=>{const a=XLSX.utils.encode_cell({r:ri,c:ci});if(!w[a])return;w[a].s={font:{name:'맑은 고딕',sz:11,bold:ri===0||ci===0,color:{rgb:ri===0?'FFFFFF':'1F2937'}},fill:{fgColor:{rgb:ri===0?'1F2937':(ri%2?'FFFFFF':'F3F4F6')}},alignment:{horizontal:ci===0?'left':'center',vertical:'center'},border:{top:b2,bottom:b2,left:b2,right:b2}}}));
+  w['!rows']=rows.map(()=>({hpx:24}));XLSX.utils.book_append_sheet(wb,w,'시즌 누적');
+}
+function glist(){$('glist').innerHTML=S.games.length?S.games.slice().sort((a,b)=>a.date<b.date?1:a.date>b.date?-1:0).map(g=>'<div class="g"><span>'+esc(g.date)+' · vs '+esc(g.opp||'상대 미정')+(g.id===S.gid?' (현재)':'')+'</span><button class="btn" data-a="load" data-id="'+esc(g.id)+'">불러오기</button><button class="btn" data-a="del" data-id="'+esc(g.id)+'">삭제</button></div>').join(''):'<p>아직 저장된 경기가 없어요.</p>'}
+const gclose=()=>{$('ov2').classList.remove('show');delArm='';newArm=false;$('gnew').textContent='새 경기 시작'};
+$('games').onclick=()=>{const g=S.games.find(x=>x.id===S.gid);$('gd').value=g?g.date:td();$('go').value=g?g.opp:'';glist();$('ov2').classList.add('show')};
+$('gsave').onclick=()=>{const rec=Object.assign(snap(),{id:S.gid||('g'+Date.now()),date:$('gd').value||td(),opp:$('go').value.trim()});S.gid=rec.id;const i=S.games.findIndex(x=>x.id===rec.id);if(i<0)S.games.push(rec);else S.games[i]=rec;save();glist();toast('경기를 저장했어요')};
+$('glist').onclick=e=>{const b=e.target.closest('button');if(!b)return;const id=b.dataset.id,g=S.games.find(x=>x.id===id);if(!g)return;
+  if(b.dataset.a==='load'){S.detail=g.detail;S.qs=g.qs;S.rounds=JSON.parse(JSON.stringify(g.rounds));S.gid=g.id;cur={r:0,q:1};hist=[];save();render();gclose();toast('경기를 불러왔어요')}
+  else{if(delArm!==id){delArm=id;b.textContent='한 번 더';return}S.games=S.games.filter(x=>x.id!==id);if(S.gid===id)S.gid='';save();glist()}};
+$('gnew').onclick=()=>{if(!newArm){newArm=true;$('gnew').textContent='저장 안 한 기록은 사라져요. 한 번 더';return}S.rounds=[mkRound(),mkRound()];S.qs=2;S.gid='';cur={r:0,q:1};hist=[];save();render();gclose()};
+$('gdone').onclick=gclose;$('ov2').onclick=e=>{if(e.target===$('ov2'))gclose()};
+$('help').onclick=()=>{const b=$('helpbox');b.hidden=!b.hidden;if(!b.hidden)b.scrollIntoView({behavior:'smooth'})};
+$('export').onclick=async()=>{
+  const dl={save:async({filename,data})=>{const a=document.createElement('a');a.href=URL.createObjectURL(data);a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000)}};
+  
+  if(typeof XLSX==='undefined'){toast('엑셀 도구를 불러오지 못했어요. 새로고침해 주세요');return}
+  const D=S.detail,C=[['pts','득점'],['p2','2점'],['p3','3점'],['ast','어시스트'],['reb','리바운드']].concat(D?[['stl','스틸']]:[],[['blk','블락'],['tov','턴오버']],D?[['fga','야투'],['fgm','성공'],['pct','야투율'],['fta','자유투 시도'],['ftm','자유투 성공']]:[]);
+  const has=(r,q)=>{const m=S.rounds[r].s[q]||{};return TEAMS.some(([t])=>S.rounds[r][t].some(n=>Object.values(m[n]||{}).some(v=>v>0)))};
+  const rs=S.rounds.map((_,r)=>r).filter(r=>{for(let q=1;q<=S.qs;q++)if(has(r,q))return true;return false});
+  if(!rs.length){toast('저장할 기록이 아직 없어요');return}
+  const W=C.length+1,ws={},mg=[],bd={top:{style:'thin'},bottom:{style:'thin'},left:{style:'thin'},right:{style:'thin'}},E=XLSX.utils.encode_cell;
+  const put=(r,c,v,s)=>{ws[E({r,c})]={v,t:typeof v==='number'?'n':'s',s:Object.assign({border:bd,alignment:{horizontal:'center',vertical:'center'}},s)}};
+  let row=3,maxC=0;
+  rs.forEach((r,i)=>{const c0=1+i*(W+1);for(let c=0;c<W;c++)put(1,c0+c,c?'':(r+1)+'R',{font:{bold:true}});mg.push({s:{r:1,c:c0},e:{r:1,c:c0+W-1}});maxC=c0+W-1});
+  for(let q=1;q<=S.qs;q++){
+    if(!rs.some(r=>has(r,q)))continue;
+    let h=0;
+    rs.forEach((r,i)=>{if(!has(r,q))return;const R=S.rounds[r],c0=1+i*(W+1);put(row,c0,q+'Q',{font:{bold:true}});C.forEach(([k,l],j)=>put(row,c0+1+j,l,{font:{bold:true}}));let k2=1;
+      TEAMS.forEach(([t])=>{const fl={fill:{fgColor:{rgb:t==='o'?'FFC000':'FFFF00'}}};R[t].forEach(n=>{const o=(R.s[q]||{})[n]||{};put(row+k2,c0,n,fl);
+        C.forEach(([k],j)=>put(row+k2,c0+1+j,k==='pct'?(FG(o).a?Math.round(FG(o).m/FG(o).a*100)+'%':''):k==='fga'?(FG(o).a||''):k==='fgm'?(FG(o).m||''):(o[k]||'')));k2++});put(row+k2,c0,'',fl);C.forEach((_,j)=>put(row+k2,c0+1+j,''));k2++});h=Math.max(h,k2)});
+    row+=h+1}
+  ws['!ref']=E({r:0,c:0})+':'+E({r:row,c:maxC});ws['!merges']=mg;ws['!cols']=Array.from({length:maxC+1},(_,c)=>({wpx:104}));
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'경기 기록');
+  if(S.games.length)seasonSheet(wb,S.games.filter(g=>g.id!==S.gid).concat([Object.assign(snap(),{id:S.gid||'cur'})]));
+  const buf=XLSX.write(wb,{type:'array',bookType:'xlsx'});
+  try{await dl.save({filename:'KSA_Killerwhales_스탯_'+new Date().toISOString().slice(0,10)+'.xlsx',data:new Blob([buf])});toast('저장했어요')}
+  catch(e){if(!e||e.code!=='declined')toast('저장하지 못했어요')}
+};
+</script>
+<script>
+/* 공유(db) 레이어: db가 없으면(로그아웃 등) 기존처럼 이 기기에만 저장 */
+window.bootShared=function(db){window._shared=1;
+const EV=db.collection('ev'),GM=db.collection('games'),MT=db.doc('meta/main');
+let G=null,lastM='',lastEv=[],evU=null,pt,started=false;
+const nid=()=>'g'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+const metaOf=()=>JSON.stringify({roster:S.roster,qs:S.qs,gid:S.gid||'',g:G,teams:S.rounds.map(R=>({o:R.o,y:R.y}))});
+const fail=()=>toast('공유 저장 실패 — 허용된 계정인지, 인터넷 연결을 확인하세요');
+const _save=save;
+save=function(){_save();if(!G)return;const j=metaOf();if(j===lastM)return;lastM=j;clearTimeout(pt);pt=setTimeout(()=>MT.set({j}).catch(fail),250)};
+function rebuild(docs){
+  const T={};docs.map(d=>d.data()).sort((a,b)=>a.t-b.t).forEach(e=>{const k=e.r+'|'+e.q+'|'+e.n,o=T[k]=T[k]||{};for(const f in e.d)o[f]=(o[f]||0)+e.sg*e.d[f]});
+  S.rounds.forEach(R=>R.s={});
+  for(const k in T){const[r,q,n]=k.split('|'),R=S.rounds[r];if(!R)continue;R.s[q]=R.s[q]||{};const o=R.s[q][n]={};for(const f in T[k])o[f]=Math.max(0,T[k][f])}
+}
+function watch(){evU&&evU();lastEv=[];evU=EV.where('g','==',G).onSnapshot(s=>{lastEv=s.docs;rebuild(lastEv);render()},()=>{})}
+function applyMeta(j){
+  const m=JSON.parse(j);lastM=j;S.roster=m.roster;S.qs=m.qs;S.gid=m.gid;
+  m.teams.forEach((t,i)=>{S.rounds[i]=S.rounds[i]||mkRound();S.rounds[i].o=t.o;S.rounds[i].y=t.y});S.rounds.length=m.teams.length;
+  if(cur.r>=S.rounds.length)cur.r=0;if(cur.q>S.qs)cur.q=1;
+  if(m.g!==G){G=m.g;watch()}else rebuild(lastEv);
+  try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}
+  render();if($('ov').classList.contains('show'))chips();
+}
+function startGames(){GM.onSnapshot(s=>{S.games=s.docs.map(d=>{const x=d.data();return Object.assign(JSON.parse(x.j),{id:x.id,date:x.date,opp:x.opp})}).sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0);if($('ov2').classList.contains('show'))glist()},()=>{})}
+const cellEv=(rounds,g)=>{const ev=[];rounds.forEach((R,r)=>{for(const q in R.s)for(const n in R.s[q]){const d=R.s[q][n];if(Object.values(d).some(v=>v>0))ev.push({g,r,q:+q,n,d,sg:1,t:Date.now()})}});return ev};
+MT.onSnapshot(async s=>{
+  if(s.exists){applyMeta(s.data().j);if(!started){started=true;startGames();toast('여러 기기와 실시간으로 공유돼요')}return}
+  if(started)return;started=true;
+  /* 첫 실행: 이 기기에 있던 기록을 공유 db로 옮김 */
+  G=nid();const ev=cellEv(S.rounds,G),L0=S.games.slice();lastM=metaOf();
+  try{await MT.set({j:lastM});watch();for(const e of ev)await EV.add(e);for(const g of L0)await GM.doc(g.id).set({id:g.id,date:g.date,opp:g.opp||'',j:JSON.stringify(g)})}catch(e){fail()}
+  startGames();
+});
+const wr=(r,q,n,d,sg)=>EV.add({g:G,r,q,n,d,sg,t:Date.now()}).catch(fail);
+const _tap=tap,_dec=dec,_undo=undo;
+tap=function(n,k){if(!G)return _tap(n,k);const d=ACT[k];wr(cur.r,cur.q,n,d,1);hist.push({r:cur.r,q:cur.q,n,d});lastN=n;toast(n+' · '+LAB[k]+'  (눌러서 취소)',1)};
+dec=function(n,k){if(!G)return _dec(n,k);const o=cell(cur.r,cur.q,n);if(!(val(o,k)>0)){toast('지울 기록이 없어요');return}
+  const d=Object.assign({},ACT[k]);if((k==='f2'||k==='f3')&&!o.fgm){delete d.fgm;delete d.fga}
+  wr(cur.r,cur.q,n,d,-1);hist.push({r:cur.r,q:cur.q,n,d,neg:1});lastN=n;toast(n+' · '+LAB[k]+' 하나 지움  (눌러서 취소)',1)};
+undo=function(){if(!G)return _undo();const h=hist.pop();if(!h){toast('되돌릴 기록이 없어요');return}wr(h.r,h.q,h.n,h.d,h.neg?1:-1);toast('취소했어요')};
+$('undo').onclick=()=>undo();
+async function startGame(rounds,qs,gidv,detail){
+  const old=G;G=nid();S.rounds=rounds.map(R=>({o:R.o,y:R.y,s:{}}));S.qs=qs;S.gid=gidv;if(detail!=null)S.detail=detail;cur={r:0,q:1};hist=[];
+  const ev=cellEv(rounds,G);lastM=metaOf();render();
+  try{await MT.set({j:lastM});watch();for(const e of ev)await EV.add(e);
+    const od=await EV.where('g','==',old).get();od.docs.forEach(d=>EV.doc(d.id).delete())}catch(e){fail()}
+}
+const fresh=()=>[mkRound(),mkRound()];
+$('reset').onclick=async()=>{if(!resetArm){resetArm=true;$('reset').textContent='한 번 더 누르면 모두 삭제돼요';return}
+  $('ov').classList.remove('show');await startGame(fresh(),2,'');toast('기록을 지웠어요')};
+$('gsave').onclick=()=>{const id=S.gid||('g'+Date.now()),rec={id,date:$('gd').value||td(),opp:$('go').value.trim()};
+  GM.doc(id).set(Object.assign({},rec,{j:JSON.stringify(Object.assign(snap(),rec))})).then(()=>{S.gid=id;save();toast('경기를 저장했어요')}).catch(fail)};
+$('glist').onclick=e=>{const b=e.target.closest('button');if(!b)return;const id=b.dataset.id,g=S.games.find(x=>x.id===id);if(!g)return;
+  if(b.dataset.a==='load'){startGame(JSON.parse(JSON.stringify(g.rounds)),g.qs,g.id,g.detail).then(()=>{gclose();toast('경기를 불러왔어요')})}
+  else{if(delArm!==id){delArm=id;b.textContent='한 번 더';return}GM.doc(id).delete().catch(fail);if(S.gid===id){S.gid='';save()}}};
+$('gnew').onclick=async()=>{if(!newArm){newArm=true;$('gnew').textContent='저장 안 한 기록은 사라져요. 한 번 더';return}gclose();await startGame(fresh(),2,'')};
+};
+</script>
+<script>
+(function(){
+/* ▼ Firebase 콘솔의 '웹 앱 설정값'을 여기에 붙여 넣으세요. 비워 두면 이 기기에만 저장돼요. */
+const FB={apiKey:"",authDomain:"",projectId:"",appId:""};
+if(!FB.apiKey||typeof firebase==='undefined')return;
+firebase.initializeApp(FB);
+const auth=firebase.auth(),fs=firebase.firestore();
+fs.enablePersistence({synchronizeTabs:true}).catch(()=>{});
+$('logout').hidden=false;
+let booted=false;
+auth.onAuthStateChanged(u=>{
+  if(!u){$('lg').classList.add('show');return}
+  $('lg').classList.remove('show');
+  if(booted)return;booted=true;
+  fs.doc('meta/main').get().then(()=>window.bootShared(fs)).catch(e=>{
+    if(e&&e.code==='permission-denied'){$('lgmsg').textContent=(u.email||'이 계정')+' 은(는) 허용된 계정이 아니에요. 다른 계정으로 로그인해 주세요.';$('lg').classList.add('show');auth.signOut();booted=false}
+    else window.bootShared(fs)});
+});
+$('glogin').onclick=()=>auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e=>{$('lgmsg').textContent='로그인 실패: '+((e&&e.code)||'')});
+if(/KAKAOTALK|Instagram|FBAN|FBAV|Line\/|NAVER\(inapp/i.test(navigator.userAgent)){$('lgmsg').textContent='앱 안의 브라우저에서는 구글 로그인이 막혀요. 오른쪽 위 메뉴에서 “다른 브라우저로 열기”를 선택해 주세요.';$('glogin').hidden=true}
+$('logout').onclick=()=>auth.signOut().then(()=>location.reload());
+})();
+</script>
+<script>
+(function(){
+const bad=()=>{if(window._shared){toast('공유 모드에서는 백업을 쓰지 않아요');return true}return false};
+$('bk').onclick=()=>{if(bad())return;
+  const d={app:'ksa-stats',v:1,at:new Date().toISOString(),S:{roster:S.roster,games:S.games,detail:S.detail,qs:S.qs,rounds:S.rounds,gid:S.gid||''}};
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(d)],{type:'application/json'}));a.download='KSA_백업_'+td()+'.json';
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);toast('백업 파일을 저장했어요')};
+$('rs').onclick=()=>{if(!bad())$('bkf').click()};
+$('bkf').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;const r=new FileReader();
+  r.onload=()=>{let d;try{d=JSON.parse(r.result)}catch(x){}
+    const n=d&&d.app==='ksa-stats'&&d.S;
+    if(!n||typeof n.roster!=='string'||!Array.isArray(n.games)||!Array.isArray(n.rounds)||!n.rounds.length||!n.rounds.every(R=>R&&Array.isArray(R.o)&&Array.isArray(R.y)&&R.s&&typeof R.s==='object')){toast('올바른 백업 파일이 아니에요');return}
+    if(!confirm('이 기기의 현재 기록과 저장된 경기가 백업 파일 내용으로 바뀌어요. 계속할까요?'))return;
+    S.roster=n.roster;S.games=n.games;S.detail=!!n.detail;S.qs=n.qs||2;S.rounds=n.rounds;S.gid=n.gid||'';cur={r:0,q:1};hist=[];save();render();glist();toast('백업을 불러왔어요')};
+  r.readAsText(f)};
+})();
+</script>
+<script>
+(function(){
+/* 노트북처럼 넓은 화면에서, 내용이 세로로 넘치면 한 화면에 들어올 때까지만 줄여요(최소 72%). */
+const _r=render,MIN=.72;
+function fit(){const w=document.querySelector('.wrap');if(!w)return;w.style.zoom='';
+  if(innerWidth<700||!$('helpbox').hidden)return;
+  let z=1;
+  for(let i=0;i<5;i++){const sh=document.documentElement.scrollHeight,vh=innerHeight;if(sh<=vh+1)break;z=Math.max(MIN,z*vh/sh);w.style.zoom=z;if(z<=MIN)break}}
+render=function(){_r();document.body.classList.toggle('dt',!!S.detail);fit()};
+let rt;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(fit,120)});
+render();
+})();
+</script>
+</body>
+</html>
